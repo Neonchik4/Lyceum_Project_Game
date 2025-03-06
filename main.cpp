@@ -126,7 +126,11 @@ public:
 };
 
 int main() {
-    std::cout << "Hello World!\n";
-    int a = 10;
-    std::cout << a;
+    setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    cout << "Лабиринт" << endl;
+    Game game;
+    game.run();
+    return 0;
 }
