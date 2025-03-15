@@ -1,9 +1,16 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <string>
 #include <windows.h>
+#include <locale.h>
+#include <thread>
+#include <chrono>
 
-using namespace std;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
 
 const char PLAYER = '@';
 const char WALL = '#';
@@ -14,6 +21,7 @@ const char DOOR = 'D';
 const char KEY = 'K';
 const char COIN = 'C';
 const char MONSTER = 'X';
+const char SWORD = 'S';
 
 const int RADIUS = 2;
 
@@ -24,44 +32,67 @@ struct Position {
 class Game {
 private:
     vector<vector<vector<char>>> levels;
-    int current_level;
-    Position player_pos;
-    int steps_in_level;
-    int total_steps;
-    int coins_collected;
-    int keys_collected;
+    int currentLevel;
+    Position playerPos;
+    int stepsInLevel;
+    int totalSteps;
+    int coinsCollected;
+    int keysCollected;
+    int swordsCollected;
+    string status;
 
 public:
     Game() {
         levels = {
             {
-                {'#', '#', '#', '#', '#', '#', '#'},
-                {'#', '.', 'C', '.', '.', 'E', '#'},
-                {'#', '.', '#', '#', 'D', '.', '#'},
-                {'#', 'K', '.', '@', 'X', '.', '#'},
-                {'#', '#', '#', '#', '#', '#', '#'}
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},
+                {'#','.','C','.','.','E','.','X','.','#','C','.','K','.','#'},
+                {'#','X','#','#','D','.','#','#','.','#','.','#','.','S','#'},
+                {'#','.','K','@','.','.','#','D','.','#','.','.','.','.','#'},
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}
             },
             {
-                {'#', '#', '#', '#', '#', '#', '#'},
-                {'#', '.', 'C', '.', '.', '.', '#'},
-                {'#', '.', '#', '#', 'D', 'E', '#'},
-                {'#', '.', '@', '.', 'X', '.', '#'},
-                {'#', '#', '#', '#', '#', '#', '#'}
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},
+                {'#','@','.','C','.','D','.','K','.','.','.','.','E','.','#'},
+                {'#','X','#','#','.','.','#','S','.','#','X','#','.','C','#'},
+                {'#','.','K','.','.','.','#','D','.','#','.','.','.','.','#'},
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}
             }
         };
-        current_level = 0;
-        steps_in_level = 0;
-        total_steps = 0;
-        coins_collected = 0;
-        keys_collected = 0;
-        find_player_position();
+
+        currentLevel = 0;
+        stepsInLevel = 0;
+        totalSteps = 0;
+        coinsCollected = 0;
+        keysCollected = 0;
+        swordsCollected = 0;
+        status = "Всё хорошо";
+        findPlayerPosition();
     }
 
-    void find_player_position() {
-        for (int i = 0; i < levels[current_level].size(); i++) {
-            for (int j = 0; j < levels[current_level][i].size(); j++) {
-                if (levels[current_level][i][j] == PLAYER) {
-                    player_pos = { i, j };
+    void showInstructions() {
+        system("cls");
+        cout << "Добро пожаловать в игру-лабиринт!\n";
+        cout << "Цель игры - собрать все предметы и найти выход.\n";
+        cout << "@ - игрок\n# - стена\n. - пустая клетка\nE - выход\nD - дверь (открывается с ключом)\n";
+        cout << "K - ключ\nC - монета\nS - меч\nX - монстр\n";
+        cout << "Команды для передвижения: вверх/вв, вниз/вн, влево/вл, вправо/вп\n";
+        cout << "Нажмите ПРОБЕЛ, чтобы пропустить инструкцию...\n";
+
+        auto start = std::chrono::steady_clock::now();
+        while (true) {
+            if (GetAsyncKeyState(VK_SPACE)) break;
+            auto now = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+            if (duration >= 15) break;
+        }
+    }
+
+    void findPlayerPosition() {
+        for (int i = 0; i < levels[currentLevel].size(); i++) {
+            for (int j = 0; j < levels[currentLevel][i].size(); j++) {
+                if (levels[currentLevel][i][j] == PLAYER) {
+                    playerPos = { i, j };
                     return;
                 }
             }
@@ -69,97 +100,87 @@ public:
     }
 
     void render() {
-        system("cls"); // Очистка экрана
-        for (int i = 0; i < levels[current_level].size(); i++) {
-            for (int j = 0; j < levels[current_level][i].size(); j++) {
-                if (abs(i - player_pos.x) <= RADIUS && abs(j - player_pos.y) <= RADIUS) {
-                    cout << levels[current_level][i][j] << ' ';
-                } else {
-                    cout << FOG << ' ';
+        system("cls");
+        for (int i = 0; i < levels[currentLevel].size(); i++) {
+            for (int j = 0; j < levels[currentLevel][i].size(); j++) {
+                if (abs(i - playerPos.x) <= RADIUS && abs(j - playerPos.y) <= RADIUS) {
+                    cout << levels[currentLevel][i][j];
+                }
+                else {
+                    cout << FOG;
                 }
             }
             cout << endl;
         }
-        cout << "Собрано монет: " << coins_collected << endl;
-        cout << "Ключей в инвентаре: " << keys_collected << endl;
-        cout << "Ходов в уровне: " << steps_in_level << endl;
-        cout << "Всего ходов: " << total_steps << endl;
+        cout << "Собрано монет: " << coinsCollected << " | Ключей: " << keysCollected;
+        cout << " | Мечей: " << swordsCollected << " | Ходов в уровне: " << stepsInLevel;
+        cout << " | Всего ходов: " << totalSteps << endl;
+        cout << "Статус: " << status << endl;
     }
 
-    void move_player(int dx, int dy) {
-        int new_x = player_pos.x + dx;
-        int new_y = player_pos.y + dy;
-
-        if (levels[current_level][new_x][new_y] == WALL) return;
-
-        // Если это монстр — проигрыш
-        if (levels[current_level][new_x][new_y] == MONSTER) {
-            cout << "Вы столкнулись с монстром! Игра окончена." << endl;
-            cout << "Вы потеряли все монеты и ключи!" << endl;
-            coins_collected = 0;
-            keys_collected = 0;
+    void nextLevel() {
+        if (currentLevel + 1 < levels.size()) {
+            currentLevel++;
+            stepsInLevel = 0;
+            status = "Переход на следующий уровень.";
+            findPlayerPosition();
+        }
+        else {
+            cout << "Поздравляем! Вы прошли все уровни!" << endl;
             exit(0);
         }
+    }
 
-        // Если это дверь — проверяем наличие ключей
-        if (levels[current_level][new_x][new_y] == DOOR) {
-            if (keys_collected > 0) {
-                cout << "Вы открыли дверь!" << endl;
-                --keys_collected;
-            } else {
-                cout << "Нужно найти ключ, чтобы открыть дверь!" << endl;
-                return;
-            }
-        }
+    void movePlayer(int dx, int dy) {
+        int newX = playerPos.x + dx;
+        int newY = playerPos.y + dy;
+        status = "Всё хорошо";
 
-        // Если это выход — переход на следующий уровень
-        if (levels[current_level][new_x][new_y] == EXIT) {
-            cout << "Поздравляем! Вы прошли уровень за " << steps_in_level << " ходов." << endl;
-            current_level++;
-            steps_in_level = 0;
-            if (current_level >= levels.size()) {
-                cout << "Вы победили! Игра завершена!" << endl;
-                cout << "Всего собрано монет: " << coins_collected << endl;
-                cout << "Всего сделано ходов: " << total_steps << endl;
-                exit(0);
-            }
-            find_player_position();
+        if (levels[currentLevel][newX][newY] == WALL) {
+            status = "Там стена.";
             return;
         }
 
-        // Если это монета — добавляем к счетчику и заменяем на пол
-        if (levels[current_level][new_x][new_y] == COIN) {
-            coins_collected++;
-            cout << "Монета собрана! Всего монет: " << coins_collected << endl;
-            levels[current_level][new_x][new_y] = FLOOR;
+        if (levels[currentLevel][newX][newY] == EXIT) {
+			status = "Вы перешли на следующий уровень";
+            nextLevel();
+            return;
         }
 
-        // Если это ключ — добавляем к счетчику и заменяем на пол
-        if (levels[current_level][new_x][new_y] == KEY) {
-            keys_collected++;
-            cout << "Ключ подобран! Всего ключей: " << keys_collected << endl;
-            levels[current_level][new_x][new_y] = FLOOR;
+        if (levels[currentLevel][newX][newY] == COIN) {
+            coinsCollected++;
+            levels[currentLevel][newX][newY] = FLOOR;
+            status = "Монета собрана.";
         }
 
-        // Перемещение игрока
-        swap(levels[current_level][player_pos.x][player_pos.y], levels[current_level][new_x][new_y]);
-        player_pos = { new_x, new_y };
+        if (levels[currentLevel][newX][newY] == KEY) {
+            keysCollected++;
+            levels[currentLevel][newX][newY] = FLOOR;
+            status = "Ключ собран.";
+        }
 
-        steps_in_level++;
-        total_steps++;
+        std::swap(levels[currentLevel][playerPos.x][playerPos.y], levels[currentLevel][newX][newY]);
+        playerPos = { newX, newY };
+
+        stepsInLevel++;
+        totalSteps++;
     }
 
     void run() {
+        showInstructions();
         string command;
         while (true) {
             render();
-            cout << "Введите команду (вверх/вв, вниз/вн, влево/вл, вправо/вп):" << endl;
+            cout << "Введите команду: ";
             getline(cin, command);
-            if (command == "вверх" || command == "вв") move_player(-1, 0);
-            else if (command == "вниз" || command == "вн") move_player(1, 0);
-            else if (command == "влево" || command == "вл") move_player(0, -1);
-            else if (command == "вправо" || command == "вп") move_player(0, 1);
-            else cout << "Неверная команда! Попробуйте снова." << endl;
+            if (command == "вверх" || command == "вв") movePlayer(-1, 0);
+            else if (command == "вниз" || command == "вн") movePlayer(1, 0);
+            else if (command == "влево" || command == "вл") movePlayer(0, -1);
+            else if (command == "вправо" || command == "вп") movePlayer(0, 1);
+            else {
+				status = "Неверная команда!";
+                cout << "Неверная команда!" << endl;
+            }
         }
     }
 };
@@ -168,7 +189,6 @@ int main() {
     setlocale(LC_ALL, "Russian");
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
-    cout << "Лабиринт" << endl;
     Game game;
     game.run();
     return 0;
