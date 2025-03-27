@@ -138,7 +138,7 @@ public:
     void SetColor(int textColor, int bgColor) {  //функция для работы с цветом переднего, заднего фона
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
-    }
+    } 
     void showleveltext() {
         system("cls");
         cout << leveltext[currentLevel] << endl;  // Вывод текста для текущего уровня
@@ -222,7 +222,7 @@ public:
     }
     void eaten() { // eaten
         SetColor(4, 0);
-        cout << "GAME OVER!У вас не было меча, чтобы защититься, и вас убил монстр :((((";
+        cout << "GAME OVER!У вас не было меча, чтобы защититься, и вас убил монстр :(";
         exit(0);
     }
 
