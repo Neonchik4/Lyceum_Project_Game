@@ -50,8 +50,8 @@ private:
     int coinsCollected;
     int keysCollected;
     int swordsCollected;
-    int doorsopened; // there
-    int killed_monsters; // there
+    int openedDoors; // there
+    int killedMonsters; // there
     string status;
 
 public:
@@ -130,8 +130,8 @@ public:
         coinsCollected = 0;
         keysCollected = 0;
         swordsCollected = 0;
-        killed_monsters = 0;
-        doorsopened = 0; // здесь
+        killedMonsters = 0;
+        openedDoors = 0; // здесь
         status = "Всё хорошо";
         findPlayerPosition();
     }
@@ -197,9 +197,9 @@ public:
             cout << endl;
         }
         SetColor(4, 0);
-        cout << "Собрано монет: " << coinsCollected << " | Ключей: " << keysCollected << " | Дверей открыто: " << doorsopened; //здесь
+        cout << "Собрано монет: " << coinsCollected << " | Ключей: " << keysCollected << " | Дверей открыто: " << openedDoors; //здесь
         cout << " | Мечей: " << swordsCollected << " | Ходов в уровне: " << stepsInLevel; //
-        cout << " | Всего ходов: " << totalSteps << " | Убитых монстров:  " << killed_monsters << endl; //
+        cout << " | Всего ходов: " << totalSteps << " | Убитых монстров:  " << killedMonsters << endl; //
         cout << "Статус: " << status << endl;
     }
 
@@ -258,7 +258,7 @@ public:
         }
         if (levels[currentLevel][newX][newY] == DOOR and keysCollected > 0) { //если открыли дверь, то остается пол
             levels[currentLevel][newX][newY] = FLOOR;
-            ++doorsopened;
+            ++openedDoors;
             --keysCollected;
             status = "Дверь открыта, ключ использован.";
         } else if (levels[currentLevel][newX][newY] == DOOR and keysCollected == 0) { // не может пройти, если нет ключа
@@ -268,7 +268,7 @@ public:
         }
         if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected > 0) { //здесь
             levels[currentLevel][newX][newY] = FLOOR;
-            ++killed_monsters;
+            ++killedMonsters;
             --swordsCollected;
             status = "Вы использовали меч и убили монстра.";
         } else if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected == 0) { // новая функция, если человека съели
