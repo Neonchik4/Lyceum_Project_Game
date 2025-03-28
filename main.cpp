@@ -26,6 +26,7 @@ const char SWORD = 'S';
 
 const int RADIUS = 2;
 
+// структура позиции игрока
 struct Position {
     int x, y;
 };
@@ -38,6 +39,7 @@ string readFile(string filename) {
     return buffer.str();
 }
 
+// класс игры
 class Game {
 private:
     vector<vector<vector<char>>> levels;
@@ -49,15 +51,15 @@ private:
     int coinsCollected;
     int keysCollected;
     int swordsCollected;
-    int openedDoors; // there
-    int killedMonsters; // there
+    int openedDoors;
+    int killedMonsters;
     string status;
 
 public:
     Game() {
         levels = {
             {
-                {'#','#','#','#','#','#','#','#','#','#','#','#','#','E','#'},//l1, first check for user
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','E','#'}, //l1, first check for user
                 {'#','#','.','.','.','.','.','.','.','.','.','#','.','.','#'},
                 {'#','#','#','#','.','#','#','#','.','#','.','#','.','.','#'},
                 {'#','@','.','.','.','.','#','.','.','#','.','.','.','.','#'},
@@ -85,28 +87,28 @@ public:
                 {'#','#','#','#','#','#','#','#','#','#','#','#','#','E','#'}
             },
             {
-                 {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},//l5, many X, many S
+                 {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}, //l5, many X, many S
                  {'#','X','@','.','#','K','.','S','.','.','X','.','.','.','#'},
                  {'#','.','#','.','.','.','#','.','#','.','C','.','E','X','#'},
                  {'#','S','.','S','#','X','.','D','.','#','.','#','.','.','#'},
                  {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}
             },
             {
-                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},//l6
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}, //l6
                 {'#','X','S','@','#','K','X','.','X','.','.','D','C','.','#'},
                 {'#','.','#','#','#','#','#','.','#','#','#','.','#','#','#'},
                 {'#','K','.','.','X','.','D','S','#','X','.','.','.','C','#'},
                 {'#','#','#','#','#','#','#','#','#','E','#','#','#','E','#'}
             },
             {
-                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},//l7
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}, //l7
                 {'#','.','C','.','.','.','.','X','.','S','C','.','K','.','#'},
                 {'#','X','#','#','.','S','#','#','#','.','#','#','.','S','#'},
                 {'#','.','K','@','.','.','S','D','.','.','.','.','E','.','#'},
                 {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}
             },
             {
-                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},//l8 with Ilya
+                {'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}, //l8 with Ilya
                 {'#','@','.','C','.','.','.','K','.','.','#','C','.','.','E'},
                 {'#','X','#','#','.','#','S','#','.','.','#','X','#','C','#'},
                 {'#','C','.','.','.','#','D','C','#','.','C','.','.','.','#'},
@@ -130,17 +132,19 @@ public:
         keysCollected = 0;
         swordsCollected = 0;
         killedMonsters = 0;
-        openedDoors = 0; // здесь
+        openedDoors = 0;
         status = "Всё хорошо";
         findPlayerPosition();
     }
-
-    void setColor(int textColor, int bgColor) {  //функция для работы с цветом переднего, заднего фона
+    
+    // функция для работы с цветом
+    void setColor(int textColor, int bgColor) {
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
     }
 
-    void showleveltext() {
+    // вывод сюжетного текста 
+    void showLevelText() {
         system("cls");
         cout << leveltext[currentLevel] << endl;  // Вывод текста для текущего уровня
         string action;
@@ -154,6 +158,7 @@ public:
         }
     }
 
+    // инструкции
     void showInstructions() {
         setColor(4, 0);
         system("cls");
@@ -176,8 +181,8 @@ public:
     }
 
     void findPlayerPosition() {
-        for (int i = 0; i < levels[currentLevel].size(); i++) {
-            for (int j = 0; j < levels[currentLevel][i].size(); j++) {
+        for (int i = 0; i < levels[currentLevel].size(); ++i) {
+            for (int j = 0; j < levels[currentLevel][i].size(); ++j) {
                 if (levels[currentLevel][i][j] == PLAYER) {
                     playerPos = { i, j };
                     return;
@@ -186,10 +191,11 @@ public:
         }
     }
 
+    // отображение уровня
     void render() {
         system("cls");
-        for (int i = 0; i < levels[currentLevel].size(); i++) {
-            for (int j = 0; j < levels[currentLevel][i].size(); j++) {
+        for (int i = 0; i < levels[currentLevel].size(); ++i) {
+            for (int j = 0; j < levels[currentLevel][i].size(); ++j) {
                 if (abs(i - playerPos.x) <= RADIUS && abs(j - playerPos.y) <= RADIUS) {
                     cout << levels[currentLevel][i][j];
                 } else {
@@ -199,18 +205,19 @@ public:
             cout << endl;
         }
         setColor(4, 0);
-        cout << "Собрано монет: " << coinsCollected << " | Ключей: " << keysCollected << " | Дверей открыто: " << openedDoors; //здесь
-        cout << " | Мечей: " << swordsCollected << " | Ходов в уровне: " << stepsInLevel; //
-        cout << " | Всего ходов: " << totalSteps << " | Убитых монстров:  " << killedMonsters << endl; //
+        cout << "Собрано монет: " << coinsCollected << " | Ключей: " << keysCollected << " | Дверей открыто: " << openedDoors;
+        cout << " | Мечей: " << swordsCollected << " | Ходов в уровне: " << stepsInLevel;
+        cout << " | Всего ходов: " << totalSteps << " | Убитых монстров:  " << killedMonsters << endl;
         cout << "Статус: " << status << endl;
     }
 
+    // следующий уровень
     void nextLevel() {
         if (currentLevel + 1 < levels.size()) {
-            currentLevel++;
+            ++currentLevel;
             stepsInLevel = 0;
             status = "Переход на следующий уровень.";
-            showleveltext();
+            showLevelText();
             findPlayerPosition();
         } else {
             if (coinsCollected == 14) {
@@ -223,24 +230,28 @@ public:
         }
     }
 
-    void eaten() { // eaten
+    // окончание игры
+    void eaten() {
         setColor(4, 0);
         cout << "GAME OVER!У вас не было меча, чтобы защититься, и вас убил монстр :(";
         exit(0);
     }
 
+    // движение игрока на dx, dy
     void movePlayer(int dx, int dy) {
         setColor(2, 0);
         int newX = playerPos.x + dx;
         int newY = playerPos.y + dy;
         status = "Всё хорошо";
 
+        // стена
         if (levels[currentLevel][newX][newY] == WALL) {
             setColor(4, 0);
             status = "Там стена.";
             return;
         }
 
+        // выход
         if (levels[currentLevel][newX][newY] == EXIT) {
             setColor(4, 0);
             status = "Вы перешли на следующий уровень";
@@ -248,17 +259,21 @@ public:
             return;
         }
 
+        // монета
         if (levels[currentLevel][newX][newY] == COIN) {
-            coinsCollected++;
+            ++coinsCollected;
             levels[currentLevel][newX][newY] = FLOOR;
             status = "Монета собрана.";
         }
 
+        // ключ
         if (levels[currentLevel][newX][newY] == KEY) {
-            keysCollected++;
+            ++keysCollected;
             levels[currentLevel][newX][newY] = FLOOR;
             status = "Ключ собран.";
         }
+
+        // дверь
         if (levels[currentLevel][newX][newY] == DOOR and keysCollected > 0) { //если открыли дверь, то остается пол
             levels[currentLevel][newX][newY] = FLOOR;
             ++openedDoors;
@@ -269,37 +284,43 @@ public:
             status = "Вы не можете открыть, у вас нет ключа, вернитесь и найдите его, либо обойдите дверь.";
             return;
         }
-        if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected > 0) { //здесь
+
+        // монстр
+        if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected > 0) {
             levels[currentLevel][newX][newY] = FLOOR;
             ++killedMonsters;
             --swordsCollected;
             status = "Вы использовали меч и убили монстра.";
-        } else if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected == 0) { // новая функция, если человека съели
+        } else if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected == 0) { // eaten, если игрока съели
             setColor(4, 0);
             eaten();
         }
-        if (levels[currentLevel][newX][newY] == SWORD) { //здесь
+
+        // меч
+        if (levels[currentLevel][newX][newY] == SWORD) {
             ++swordsCollected;
             levels[currentLevel][newX][newY] = FLOOR;
             status = "Вы забрали меч.";
         }
 
+        // передвигаем персонажа
         std::swap(levels[currentLevel][playerPos.x][playerPos.y], levels[currentLevel][newX][newY]);
         playerPos = { newX, newY };
 
-        stepsInLevel++;
-        totalSteps++;
+        ++stepsInLevel;
+        ++totalSteps;
     }
 
+    // запуск
     void run() {
         showInstructions();
         setColor(4, 0);
-        showleveltext();
+        showLevelText();
         string command;
         while (true) {
             render();
             cout << "Введите команду: ";
-            cin >> command;//
+            cin >> command;
             if (command == "w" || command == "ц") movePlayer(-1, 0);
             else if (command == "s" || command == "ы") movePlayer(1, 0);
             else if (command == "a" || command == "ф") movePlayer(0, -1);
@@ -315,6 +336,7 @@ public:
 
 
 int main() {
+    // локализация
     setlocale(LC_ALL, "Russian");
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
