@@ -5,7 +5,6 @@
 #include <sstream>
 #include <windows.h>
 #include <locale.h>
-#include <thread>
 #include <chrono>
 
 using std::cin;
@@ -135,10 +134,12 @@ public:
         status = "Всё хорошо";
         findPlayerPosition();
     }
-    void SetColor(int textColor, int bgColor) {  //функция для работы с цветом переднего, заднего фона
+
+    void setColor(int textColor, int bgColor) {  //функция для работы с цветом переднего, заднего фона
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
-    } 
+    }
+
     void showleveltext() {
         system("cls");
         cout << leveltext[currentLevel] << endl;  // Вывод текста для текущего уровня
@@ -152,8 +153,9 @@ public:
             cin >> action;
         }
     }
+
     void showInstructions() {
-        SetColor(4, 0);
+        setColor(4, 0);
         system("cls");
         cout << "Добро пожаловать в игру-лабиринт!\n";
         cout << "Цель игры - собирать монеты и попытаться найти выход живым.. А еще смотрите на статус, там могут быть подсказки.\n";
@@ -196,7 +198,7 @@ public:
             }
             cout << endl;
         }
-        SetColor(4, 0);
+        setColor(4, 0);
         cout << "Собрано монет: " << coinsCollected << " | Ключей: " << keysCollected << " | Дверей открыто: " << openedDoors; //здесь
         cout << " | Мечей: " << swordsCollected << " | Ходов в уровне: " << stepsInLevel; //
         cout << " | Всего ходов: " << totalSteps << " | Убитых монстров:  " << killedMonsters << endl; //
@@ -211,35 +213,36 @@ public:
             showleveltext();
             findPlayerPosition();
         } else {
-            if (coinsCollected == 14) {//
+            if (coinsCollected == 14) {
                 cout << "Поздравляем! Вы прошли все уровни и собрали все монеты!" << endl;
                 exit(0);
             } else {
-                cout << "Поздравляем! Вы прошли все уровни, но не собрали все монеты((!" << endl;
+                cout << "Поздравляем! Вы прошли все уровни, но не собрали все монеты :(!" << endl;
                 exit(0);
             }
         }
     }
+
     void eaten() { // eaten
-        SetColor(4, 0);
+        setColor(4, 0);
         cout << "GAME OVER!У вас не было меча, чтобы защититься, и вас убил монстр :(";
         exit(0);
     }
 
     void movePlayer(int dx, int dy) {
-        SetColor(2, 0);
+        setColor(2, 0);
         int newX = playerPos.x + dx;
         int newY = playerPos.y + dy;
         status = "Всё хорошо";
 
         if (levels[currentLevel][newX][newY] == WALL) {
-            SetColor(4, 0);
+            setColor(4, 0);
             status = "Там стена.";
             return;
         }
 
         if (levels[currentLevel][newX][newY] == EXIT) {
-            SetColor(4, 0);
+            setColor(4, 0);
             status = "Вы перешли на следующий уровень";
             nextLevel();
             return;
@@ -262,7 +265,7 @@ public:
             --keysCollected;
             status = "Дверь открыта, ключ использован.";
         } else if (levels[currentLevel][newX][newY] == DOOR and keysCollected == 0) { // не может пройти, если нет ключа
-            SetColor(4, 0);
+            setColor(4, 0);
             status = "Вы не можете открыть, у вас нет ключа, вернитесь и найдите его, либо обойдите дверь.";
             return;
         }
@@ -272,7 +275,7 @@ public:
             --swordsCollected;
             status = "Вы использовали меч и убили монстра.";
         } else if (levels[currentLevel][newX][newY] == MONSTER and swordsCollected == 0) { // новая функция, если человека съели
-            SetColor(4, 0);
+            setColor(4, 0);
             eaten();
         }
         if (levels[currentLevel][newX][newY] == SWORD) { //здесь
@@ -290,7 +293,7 @@ public:
 
     void run() {
         showInstructions();
-        SetColor(4, 0);
+        setColor(4, 0);
         showleveltext();
         string command;
         while (true) {
@@ -303,7 +306,7 @@ public:
             else if (command == "d" || command == "в") movePlayer(0, 1);
             else {
                 status = "Неверная команда!";
-                SetColor(4, 0);
+                setColor(4, 0);
                 cout << "Неверная команда!" << endl;
             }
         }
